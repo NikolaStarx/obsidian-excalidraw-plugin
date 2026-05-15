@@ -133,6 +133,7 @@ import {
 
 declare const PLUGIN_VERSION: string;
 declare const INITIAL_TIMESTAMP: number;
+const LEGACY_HOST_PLUGIN_ID = "obsidian-excalidraw-plugin";
 
 type FileMasterInfo = {
   isHyperLink: boolean;
@@ -650,6 +651,33 @@ export default class ExcalidrawPlugin extends Plugin {
     );
   }
 
+  private registerLegacyHostPluginAlias() {
+    const plugins = (this.app as any).plugins?.plugins;
+    if (!plugins || plugins[LEGACY_HOST_PLUGIN_ID]) {
+      return;
+    }
+    plugins[LEGACY_HOST_PLUGIN_ID] = this;
+    this.register(() => {
+      if (plugins[LEGACY_HOST_PLUGIN_ID] === this) {
+        delete plugins[LEGACY_HOST_PLUGIN_ID];
+      }
+    });
+  }
+
+  private refreshCommandPaletteCommands() {
+    const commandPalette = (this.app as any).internalPlugins?.plugins?.[
+      "command-palette"
+    ]?.instance;
+    if (
+      !commandPalette ||
+      typeof commandPalette.getCommands !== "function" ||
+      !commandPalette.modal
+    ) {
+      return;
+    }
+    commandPalette.modal.commands = commandPalette.getCommands();
+  }
+
   get locale() {
     return LOCALE;
   }
@@ -752,6 +780,7 @@ export default class ExcalidrawPlugin extends Plugin {
 
   async onload() {
     this.logStartupEvent("Plugin Constructor ready, starting onload()");
+    this.registerLegacyHostPluginAlias();
     this.registerView(VIEW_TYPE_EXCALIDRAW, (leaf: WorkspaceLeaf) => {
       if (this.isReady) {
         return new ExcalidrawView(leaf, this);
@@ -776,9 +805,8 @@ export default class ExcalidrawPlugin extends Plugin {
     );
 
     try {
-      this.loadSettings({ reEnableAutosave: true }).then(
-        this.onloadCheckForOnceOffSettingsUpdates.bind(this),
-      );
+      await this.loadSettings({ reEnableAutosave: true });
+      await this.onloadCheckForOnceOffSettingsUpdates();
     } catch (e) {
       new Notice("Error loading plugin settings", 6000);
       console.error("Error loading plugin settings", e);
@@ -793,6 +821,16 @@ export default class ExcalidrawPlugin extends Plugin {
       console.error("Error initializing Excalidraw Automate", e);
     }
     this.logStartupEvent("Excalidraw Automate initialized");
+
+    try {
+      this.commandManager = new CommandManager(this);
+      this.commandManager.initialize();
+      this.refreshCommandPaletteCommands();
+    } catch (e) {
+      new Notice("Error registering commands", 6000);
+      console.error("Error registering commands", e);
+    }
+    this.logStartupEvent("Commands registered early");
 
     try {
       //Licat: Are you registering your post processors in onLayoutReady? You should register them in onload instead
@@ -843,7 +881,6 @@ export default class ExcalidrawPlugin extends Plugin {
     this.packageManager = new PackageManager(this);
     this.eventManager = new EventManager(this);
     this.observerManager = new ObserverManager(this);
-    this.commandManager = new CommandManager(this);
 
     try {
       initCompressionWorker();
@@ -974,8 +1011,6 @@ export default class ExcalidrawPlugin extends Plugin {
       console.error("Error registering script install-codeblock processor", e);
     }
     this.logStartupEvent("Script install-codeblock processor registered");
-
-    this.commandManager.initialize();
 
     try {
       this.registerEditorSuggest(new FieldSuggester(this));

@@ -21,6 +21,7 @@ import {
   ExcalidrawTextElement,
   FileId,
   NonDeletedExcalidrawElement,
+  OrderedExcalidrawElement,
 } from "@zsviczian/excalidraw/types/element/src/types";
 import {
   AppState,
@@ -245,6 +246,7 @@ import {
   getElementsWithLinkMatchingQuery,
   getImagesMatchingQuery,
 } from "src/utils/excalidrawAutomateUtils";
+import { LiveCollaborationManager } from "src/live/LiveCollaborationManager";
 
 const EMBEDDABLE_SEMAPHORE_TIMEOUT = 2000;
 const PREVENT_RELOAD_TIMEOUT = 2000;
@@ -380,6 +382,7 @@ export default class ExcalidrawView
   public hoverPopover: HoverPopover | null = null;
   private freedrawLastActiveTimestamp: number = 0;
   public exportDialog: ExportDialog | null = null;
+  public liveCollaboration: LiveCollaborationManager | null = null;
   public excalidrawData: ExcalidrawData;
   //public excalidrawRef: React.MutableRefObject<any> = null;
   public excalidrawRoot: any;
@@ -485,6 +488,7 @@ export default class ExcalidrawView
     this.canvasNodeFactory = new CanvasNodeFactory(this);
     this.setHookServer();
     this.dropManager = new DropManager(this);
+    this.liveCollaboration = new LiveCollaborationManager(this);
   }
 
   get hookServer(): ExcalidrawAutomate | null {
@@ -2681,6 +2685,8 @@ export default class ExcalidrawView
     this.exitFullscreen();
 
     await this.forceSaveIfRequired();
+    this.liveCollaboration?.destroy();
+    this.liveCollaboration = null;
     if (this.excalidrawRoot) {
       this.excalidrawRoot.unmount();
       this.excalidrawRoot = null;
@@ -2792,6 +2798,7 @@ export default class ExcalidrawView
   //onunload is called first
   onunload() {
     super.onunload();
+    this.liveCollaboration?.destroy();
     this.destroyers.forEach((destroyer) => destroyer());
     this.restoreMobileLeaves();
     setMobileNavbarPosition(false);
@@ -5245,6 +5252,7 @@ export default class ExcalidrawView
     pointersMap: Gesture["pointers"];
   }) {
     this.currentPosition = p.pointer;
+    this.liveCollaboration?.onPointerUpdate(p);
     if (
       this.hoverPreviewTarget &&
       (Math.abs(this.hoverPoint.x - p.pointer.x) > 50 ||
@@ -5457,6 +5465,10 @@ export default class ExcalidrawView
         this.colorChangeTimer = null;
       }, 50); //just enough time if the user is playing with color picker, the change is not too frequent.
     }
+    this.liveCollaboration?.syncElements(
+      ((this.excalidrawAPI as any)?.getSceneElementsIncludingDeleted?.() ??
+        et) as readonly OrderedExcalidrawElement[],
+    );
     if (this.semaphores.dirty) {
       return;
     }
@@ -7194,6 +7206,7 @@ export default class ExcalidrawView
       React.createElement(MainMenu.DefaultItems.Preferences),
       React.createElement(MainMenu.DefaultItems.ToggleTheme),
       React.createElement(MainMenu.Separator),
+      this.liveCollaboration?.renderMainMenuItem(MainMenu),
       React.createElement(
         MainMenu.Item,
         {
@@ -7333,7 +7346,23 @@ export default class ExcalidrawView
   }
 
   private renderTopRightUI(isMobile: boolean, appState: AppState) {
-    return this.obsidianMenu?.renderButton(isMobile, appState);
+    const React = this.packages.react;
+    const liveButton = this.liveCollaboration?.renderTopRightUI(
+      isMobile,
+      appState,
+    );
+    const obsidianButton = this.obsidianMenu?.renderButton(isMobile, appState);
+
+    if (!React || !liveButton) {
+      return obsidianButton;
+    }
+
+    return React.createElement(
+      React.Fragment,
+      {},
+      liveButton,
+      obsidianButton,
+    );
   }
 
   private scheduleBatchedResize(currentDeltaHeight: number) {
@@ -7588,6 +7617,7 @@ export default class ExcalidrawView
             initState: initdata?.appState,
             initialData: initdata,
             detectScroll: true,
+            isCollaborating: false,
             onPointerUpdate: this.onPointerUpdate.bind(this),
             libraryReturnUrl: "app://obsidian.md",
             autoFocus: true,

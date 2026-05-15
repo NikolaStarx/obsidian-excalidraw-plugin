@@ -6,7 +6,12 @@ import {
   TFile,
   Vault,
 } from "obsidian";
-import { DEVICE, RERENDER_EVENT } from "../../constants/constants";
+import {
+  DEVICE,
+  FRONTMATTER_KEYS,
+  PLUGIN_ID,
+  RERENDER_EVENT,
+} from "../../constants/constants";
 import { EmbeddedFilesLoader } from "../../shared/EmbeddedFileLoader";
 import { createPNG, createSVG } from "../../utils/excalidrawAutomateUtils";
 import ExcalidrawPlugin from "../main";
@@ -622,9 +627,7 @@ const createImgElement = async (
     if (imgOrDiv?.parentElement?.hasClass("canvas-node-content")) {
       return;
     }
-    const PLUGIN = app.plugins.plugins[
-      "obsidian-excalidraw-plugin"
-    ] as ExcalidrawPlugin;
+    const PLUGIN = app.plugins.plugins[PLUGIN_ID] as ExcalidrawPlugin;
     const timeoutValue = DEVICE.isDesktop
       ? PLUGIN.settings.longPressDesktop
       : PLUGIN.settings.longPressMobile;
@@ -1195,7 +1198,7 @@ export const markdownPostProcessor = async (
   //transcluded text element or some other transcluded content inside the Excalidraw file
   //in reading mode these elements should be hidden
   const excalidrawFile = Boolean(
-    ctx.frontmatter?.hasOwnProperty("excalidraw-plugin"),
+    ctx.frontmatter?.hasOwnProperty(FRONTMATTER_KEYS.plugin.name),
   );
   if (!(isPreview || isMarkdownReadingMode || isPrinting) && excalidrawFile) {
     setElementDisplay(el, "none");

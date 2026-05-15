@@ -233,6 +233,11 @@ export interface ExcalidrawSettings {
   markdownNodeOneClickEditing: boolean;
   canvasImmersiveEmbed: boolean;
   startupScriptPath: string;
+  liveCollaborationEnabled: boolean;
+  liveCollaborationMode: "official" | "custom";
+  liveCollaborationServerUrl: string;
+  liveCollaborationClientUrl: string;
+  liveCollaborationUsername: string;
   aiEnabled: boolean;
   aiVerboseLogging: boolean;
   aiProviderProfiles: Record<string, AIProviderProfile>;
@@ -732,6 +737,11 @@ export const DEFAULT_SETTINGS: ExcalidrawSettings = {
   markdownNodeOneClickEditing: false,
   canvasImmersiveEmbed: true,
   startupScriptPath: "",
+  liveCollaborationEnabled: true,
+  liveCollaborationMode: "official",
+  liveCollaborationServerUrl: "https://oss-collab.excalidraw.com",
+  liveCollaborationClientUrl: "https://excalidraw.com",
+  liveCollaborationUsername: "",
   aiEnabled: true,
   aiVerboseLogging: false,
   aiProviderProfiles: cloneKnownAIProviderProfiles(),

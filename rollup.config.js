@@ -268,6 +268,23 @@ const getRollupPlugins = (tsconfig, ...plugins) => [
     preventAssignment: true,
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
   }),
+  {
+    name: "force-node-websocket-for-socket-io",
+    resolveId(source, importer) {
+      if (
+        source === "./websocket-constructor.js" &&
+        importer?.endsWith("engine.io-client/build/esm/transports/websocket.js")
+      ) {
+        return path.resolve(
+          "node_modules/engine.io-client/build/esm/transports/websocket-constructor.js",
+        );
+      }
+      if (source === "ws") {
+        return path.resolve("node_modules/ws/index.js");
+      }
+      return null;
+    },
+  },
   commonjs(),
   nodeResolve({ browser: true, preferBuiltins: false }),
 ].concat(plugins);

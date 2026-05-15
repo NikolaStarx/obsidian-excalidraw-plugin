@@ -39,6 +39,7 @@ import {
   getMaximumGroups,
   intersectElementWithLine,
   DEVICE,
+  FRONTMATTER_KEYS,
   mermaidToExcalidraw,
   refreshTextDimensions,
   getFontFamilyString,
@@ -1319,8 +1320,9 @@ export class ExcalidrawAutomate {
     let frontmatter: string;
     if (params?.frontmatterKeys) {
       const keys = Object.keys(params.frontmatterKeys);
-      if (!keys.includes("excalidraw-plugin")) {
-        params.frontmatterKeys["excalidraw-plugin"] = "parsed";
+      const pluginKey = FRONTMATTER_KEYS.plugin.name;
+      if (!keys.includes(pluginKey)) {
+        params.frontmatterKeys[pluginKey] = "parsed";
       }
       frontmatter = "---\n\n";
       for (const key of Object.keys(params.frontmatterKeys)) {

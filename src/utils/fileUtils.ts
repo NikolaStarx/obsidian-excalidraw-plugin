@@ -369,7 +369,7 @@ export const readLocalFile = async (filePath: string): Promise<string> => {
     return null;
   }
   return new Promise((resolve, reject) => {
-    const adapter = app.vault.adapter as NodeFsDataAdapter;
+    const adapter = EXCALIDRAW_PLUGIN.app.vault.adapter as NodeFsDataAdapter;
     adapter.fs.readFile(filePath, "utf8", (err, data) => {
       if (err) {
         reject(err);
@@ -388,7 +388,7 @@ export const readLocalFileBinary = async (
   }
   return new Promise((resolve, reject) => {
     const path = decodeURI(filePath);
-    const adapter = app.vault.adapter as NodeFsDataAdapter;
+    const adapter = EXCALIDRAW_PLUGIN.app.vault.adapter as NodeFsDataAdapter;
     adapter.fs.readFile(path, (err, data) => {
       if (err) {
         reject(err);

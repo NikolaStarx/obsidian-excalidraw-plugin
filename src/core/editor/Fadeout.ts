@@ -6,6 +6,7 @@ import {
   ViewPlugin,
   ViewUpdate,
 } from "@codemirror/view";
+import { FRONTMATTER_KEYS } from "src/constants/constants";
 
 const o30 = Decoration.line({ attributes: { class: "ex-opacity-30" } });
 const o15 = Decoration.line({ attributes: { class: "ex-opacity-15" } });
@@ -26,7 +27,9 @@ export const HideTextBetweenCommentsExtension = ViewPlugin.fromClass(
     constructor(view: EditorView) {
       this.view = view;
       this.isExcalidraw =
-        view.state.doc.toString().search(/^excalidraw-plugin: /m) > 0;
+        view.state.doc
+          .toString()
+          .search(new RegExp(`^${FRONTMATTER_KEYS.plugin.name}: `, "m")) > 0;
       if (!this.isExcalidraw) {
         this.decorations = Decoration.none;
         return;

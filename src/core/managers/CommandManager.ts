@@ -219,6 +219,21 @@ export class CommandManager {
       this.app.workspace.on("file-menu", fileMenuHandlerCreateNew),
     );
 
+    this.addCommand({
+      id: "open-live-collaboration",
+      name: "Open live collaboration",
+      checkCallback: (checking: boolean) => {
+        const view = this.app.workspace.getActiveViewOfType(ExcalidrawView);
+        if (!view?.excalidrawAPI || !view.liveCollaboration) {
+          return false;
+        }
+        if (!checking) {
+          view.liveCollaboration.openDialog();
+        }
+        return true;
+      },
+    });
+
     const fileMenuHandlerConvertKeepExtension = (menu: Menu, file: TFile) => {
       if (file instanceof TFile && file.extension == "excalidraw") {
         menu.addItem((item: MenuItem) => {
