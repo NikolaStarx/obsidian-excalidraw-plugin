@@ -4,21 +4,35 @@ Excalive is a personal fork of the Obsidian Excalidraw plugin. It keeps the upst
 
 ## Quick install
 
-On macOS, copy this command into Terminal. It will open a folder picker; choose the Obsidian vault where you want to install Excalive.
+On macOS, copy this command into Terminal. It works in fish, zsh, and bash. It will open a folder picker; choose the Obsidian vault where you want to install Excalive.
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/NikolaStarx/obsidian-excalidraw-plugin/master/scripts/install-excalive.sh)
+curl -fsSL https://raw.githubusercontent.com/NikolaStarx/obsidian-excalidraw-plugin/master/scripts/install-excalive.sh | bash
 ```
 
 If you prefer to pass the vault path directly:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/NikolaStarx/obsidian-excalidraw-plugin/master/scripts/install-excalive.sh) "/path/to/your/vault"
+curl -fsSL https://raw.githubusercontent.com/NikolaStarx/obsidian-excalidraw-plugin/master/scripts/install-excalive.sh | bash -s -- "/path/to/your/vault"
 ```
 
 After installing, restart or reload Obsidian, enable **Excalive** in Community plugins, and disable the original **Excalidraw** plugin if you want Excalive to replace it.
 
 Manual download: [excalive-v2.22.3-live.1 release](https://github.com/NikolaStarx/obsidian-excalidraw-plugin/releases/tag/excalive-v2.22.3-live.1)
+
+## Updating from upstream Excalidraw
+
+This fork is designed to stay close to the upstream Obsidian Excalidraw plugin. The live-collaboration work is kept as a small patch set on top of upstream, so future upstream releases can usually be pulled in with a normal Git merge:
+
+```bash
+git fetch origin
+git checkout codex/live-collaboration-private-plugin
+git merge origin/master
+npm install
+npm run build
+```
+
+Conflicts are most likely if upstream changes command registration, Excalidraw view wiring, or collaboration-related internals. After each merge, rebuild the plugin, copy the three release files (`main.js`, `manifest.json`, `styles.css`), and test both regular Excalidraw commands and live collaboration before publishing a new Excalive release.
 
 ## BRAT install
 
