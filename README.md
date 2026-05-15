@@ -21,7 +21,7 @@ The command downloads the latest Excalive release assets and overwrites the loca
 To install a specific release instead of the latest one:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/NikolaStarx/obsidian-excalidraw-plugin/master/scripts/install-excalive.sh | env EXCALIVE_TAG=excalive-v2.22.3-live.1 bash -s -- "/path/to/your/vault"
+curl -fsSL https://raw.githubusercontent.com/NikolaStarx/obsidian-excalidraw-plugin/master/scripts/install-excalive.sh | env EXCALIVE_TAG=excalive-v2.22.3-live.2 bash -s -- "/path/to/your/vault"
 ```
 
 Manual download: [latest Excalive release](https://github.com/NikolaStarx/obsidian-excalidraw-plugin/releases/latest)

@@ -3,7 +3,7 @@ set -euo pipefail
 
 REPO="NikolaStarx/obsidian-excalidraw-plugin"
 PLUGIN_ID="obsidian-excalive-plugin"
-DEFAULT_TAG="excalive-v2.22.3-live.1"
+DEFAULT_TAG="excalive-v2.22.3-live.2"
 
 if [ "${EXCALIVE_TAG:-}" != "" ]; then
   TAG="$EXCALIVE_TAG"
