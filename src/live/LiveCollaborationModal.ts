@@ -32,21 +32,21 @@ export class LiveCollaborationModal extends Modal {
     contentEl.addClass("excalive-modal");
 
     this.renderHeader(contentEl);
+
+    if (this.manager.isCollaborating()) {
+      await this.renderActiveSession(contentEl);
+      this.scheduleActiveRefresh();
+      return;
+    }
+
     this.renderModePicker(contentEl);
     this.renderNameField(contentEl);
 
     if (this.manager.getMode() === "custom") {
       this.renderCustomServerFields(contentEl);
-    } else {
-      this.renderOfficialSummary(contentEl);
     }
 
-    if (this.manager.isCollaborating()) {
-      await this.renderActiveSession(contentEl);
-      this.scheduleActiveRefresh();
-    } else {
-      this.renderStartSession(contentEl);
-    }
+    this.renderStartSession(contentEl);
   }
 
   private scheduleActiveRefresh() {
@@ -66,30 +66,41 @@ export class LiveCollaborationModal extends Modal {
 
   private renderHeader(contentEl: HTMLElement) {
     const header = contentEl.createDiv({ cls: "excalive-modal__header" });
+    header.createDiv({
+      text: "Excalive room",
+      cls: "excalive-modal__eyebrow",
+    });
     header.createEl("h2", {
       text: "Live collaboration",
       cls: "excalive-modal__title",
     });
     header.createEl("p", {
-      text: "Start a room, scan the QR code on iPad, and draw together with live cursors.",
+      text: "Start a room, scan it on iPad, and draw together with live cursors.",
       cls: "excalive-modal__subtitle",
     });
   }
 
   private renderModePicker(contentEl: HTMLElement) {
     const mode = this.manager.getMode();
-    const tabs = contentEl.createDiv({ cls: "excalive-mode-tabs" });
+    const panel = contentEl.createDiv({
+      cls: "excalive-panel excalive-panel--mode",
+    });
+    this.createSectionHeading(panel, {
+      title: "Room source",
+      text: "Choose the link format and server before starting.",
+    });
+    const tabs = panel.createDiv({ cls: "excalive-mode-tabs" });
 
     this.createModeButton(tabs, {
       mode: "official",
       title: "Excalidraw.com",
-      detail: "Use excalidraw.com/#room links",
+      detail: "Official #room link and public server",
       active: mode === "official",
     });
     this.createModeButton(tabs, {
       mode: "custom",
       title: "Custom server",
-      detail: "LAN or public Socket.IO server",
+      detail: "LAN or public Socket.IO endpoint",
       active: mode === "custom",
     });
   }
@@ -105,10 +116,12 @@ export class LiveCollaborationModal extends Modal {
   ) {
     const button = container.createEl("button", {
       cls: `excalive-mode-tab${options.active ? " is-active" : ""}`,
-      attr: { type: "button" },
+      attr: { type: "button", "aria-pressed": String(options.active) },
     });
-    button.createSpan({ text: options.title, cls: "excalive-mode-tab__title" });
-    button.createSpan({ text: options.detail, cls: "excalive-mode-tab__detail" });
+    button.createSpan({ cls: "excalive-mode-tab__indicator" });
+    const copy = button.createSpan({ cls: "excalive-mode-tab__copy" });
+    copy.createSpan({ text: options.title, cls: "excalive-mode-tab__title" });
+    copy.createSpan({ text: options.detail, cls: "excalive-mode-tab__detail" });
     button.onclick = async () => {
       await this.manager.setMode(options.mode);
       await this.render();
@@ -116,69 +129,59 @@ export class LiveCollaborationModal extends Modal {
   }
 
   private renderNameField(contentEl: HTMLElement) {
-    this.createTextField(contentEl, {
+    const panel = contentEl.createDiv({ cls: "excalive-panel" });
+    this.createTextField(panel, {
       label: "Your name",
       value: this.manager.getUsername(),
       placeholder: "Obsidian",
+      description: "Shown to other collaborators beside your cursor.",
       onChange: (value) => this.manager.setUsername(value),
-    });
-  }
-
-  private renderOfficialSummary(contentEl: HTMLElement) {
-    const card = contentEl.createDiv({
-      cls: "excalive-card excalive-card--official",
-    });
-    card.createDiv({
-      text: "Official room",
-      cls: "excalive-card__label",
-    });
-    card.createEl("p", {
-      text: "Creates an excalidraw.com/#room link. Scan the QR code on iPad to join the same official Excalidraw live session.",
-      cls: "excalive-card__text",
     });
   }
 
   private renderCustomServerFields(contentEl: HTMLElement) {
     const card = contentEl.createDiv({
-      cls: "excalive-card excalive-card--custom",
+      cls: "excalive-card excalive-card--custom excalive-server-card",
     });
-    card.createDiv({
-      text: "Custom server",
-      cls: "excalive-card__label",
-    });
-    card.createEl("p", {
-      text: "Use this for a LAN or public collaboration server. The iPad link must point to a compatible Excalidraw frontend using the same Socket.IO server.",
-      cls: "excalive-card__text",
+    this.createSectionHeading(card, {
+      title: "Custom collaboration target",
+      text: "Use a LAN or public endpoint. The iPad link must open a compatible Excalidraw client using the same server.",
     });
 
-    this.createTextField(card, {
+    const fields = card.createDiv({ cls: "excalive-server-fields" });
+    this.createTextField(fields, {
       label: "Socket.IO server",
       value: this.manager.getServerUrl(),
       placeholder: "https://oss-collab.excalidraw.com",
+      description: "Backend used by Obsidian.",
       onChange: (value) => this.manager.setServerUrl(value),
     });
-    this.createTextField(card, {
+    this.createTextField(fields, {
       label: "Client link base",
       value: this.manager.getClientUrl(),
       placeholder: "https://excalidraw.com",
+      description: "Web client opened by QR and copy link.",
       onChange: (value) => this.manager.setClientUrl(value),
     });
   }
 
   private renderStartSession(contentEl: HTMLElement) {
-    const start = contentEl.createDiv({ cls: "excalive-section" });
-    start.createDiv({
-      text:
+    const sessionGrid = contentEl.createDiv({ cls: "excalive-session-grid" });
+    const start = sessionGrid.createDiv({
+      cls: "excalive-section excalive-section--start",
+    });
+    this.createSectionHeading(start, {
+      title:
         this.manager.getMode() === "official"
-          ? "Start an official Excalidraw.com room"
-          : "Start a room on your custom server",
-      cls: "excalive-section__title",
+          ? "Start a new Excalidraw.com room"
+          : "Start a new custom room",
+      text: "Creates a private room from the current drawing.",
     });
 
     const actions = start.createDiv({ cls: "excalive-actions" });
     const startButton = actions.createEl("button", {
-      text: "Start room",
-      cls: "mod-cta",
+      text: "Start new room",
+      cls: "mod-cta excalive-primary-action",
       attr: { type: "button" },
     });
     startButton.onclick = async () => {
@@ -187,15 +190,18 @@ export class LiveCollaborationModal extends Modal {
       window.setTimeout(() => this.render(), 1200);
     };
 
-    const join = contentEl.createDiv({ cls: "excalive-section" });
-    join.createDiv({
-      text: "Join an existing room",
-      cls: "excalive-section__title",
+    const join = sessionGrid.createDiv({
+      cls: "excalive-section excalive-section--join",
+    });
+    this.createSectionHeading(join, {
+      title: "Join existing room",
+      text: "Paste a room link and connect this drawing.",
     });
     this.createTextField(join, {
       label: "Room link",
       value: this.joinLink,
       placeholder: "https://excalidraw.com/#room=...",
+      description: "Official and custom room links are accepted.",
       onChange: (value) => {
         this.joinLink = value;
       },
@@ -203,7 +209,7 @@ export class LiveCollaborationModal extends Modal {
 
     const joinActions = join.createDiv({ cls: "excalive-actions" });
     const joinButton = joinActions.createEl("button", {
-      text: "Join pasted room",
+      text: "Join room",
       attr: { type: "button" },
     });
     joinButton.onclick = async () => {
@@ -221,7 +227,11 @@ export class LiveCollaborationModal extends Modal {
   private async renderActiveSession(contentEl: HTMLElement) {
     const activeRoomLink = this.manager.getActiveRoomLink() ?? "";
 
-    const status = contentEl.createDiv({ cls: "excalive-status" });
+    const status = contentEl.createDiv({
+      cls: `excalive-status ${
+        this.manager.isConnected() ? "is-connected" : "is-connecting"
+      }`,
+    });
     status.createSpan({
       cls: `excalive-status__dot ${
         this.manager.isConnected() ? "is-connected" : "is-connecting"
@@ -238,16 +248,18 @@ export class LiveCollaborationModal extends Modal {
       cls: "excalive-status__text",
     });
 
-    const linkCard = contentEl.createDiv({ cls: "excalive-card" });
-    linkCard.createDiv({
-      text:
+    const linkCard = contentEl.createDiv({ cls: "excalive-card excalive-share" });
+    this.createSectionHeading(linkCard, {
+      title:
         this.manager.getMode() === "official"
           ? "Excalidraw.com room link"
           : "Custom room link",
-      cls: "excalive-card__label",
+      text: "Open this exact link on iPad or another browser. The room key is part of the link.",
     });
 
-    const linkRow = linkCard.createDiv({ cls: "excalive-link-row" });
+    const shareGrid = linkCard.createDiv({ cls: "excalive-share-grid" });
+    const linkPanel = shareGrid.createDiv({ cls: "excalive-share-link" });
+    const linkRow = linkPanel.createDiv({ cls: "excalive-link-row" });
     const input = linkRow.createEl("input", {
       value: activeRoomLink,
       attr: { readonly: "true" },
@@ -260,8 +272,13 @@ export class LiveCollaborationModal extends Modal {
       attr: { type: "button" },
     });
     copyButton.onclick = () => this.manager.copyRoomLink();
+    linkPanel.createEl("p", {
+      text: "The room key is embedded in this link and used for end-to-end encryption.",
+      cls: "excalive-share-note",
+    });
 
-    const qrWrap = linkCard.createDiv({ cls: "excalive-qr" });
+    const qrPanel = shareGrid.createDiv({ cls: "excalive-qr-panel" });
+    const qrWrap = qrPanel.createDiv({ cls: "excalive-qr" });
     try {
       const qrDataUrl = await QRCode.toDataURL(activeRoomLink, {
         margin: 1,
@@ -278,15 +295,15 @@ export class LiveCollaborationModal extends Modal {
       qrWrap.setText("Could not generate QR code.");
     }
 
-    linkCard.createEl("p", {
-      text: "Scan this QR code on iPad. It must open the room link above, not a normal blank Excalidraw page.",
-      cls: "excalive-card__text",
+    qrPanel.createEl("p", {
+      text: "Scan on iPad. If it opens a blank Excalidraw page, reload that tab once.",
+      cls: "excalive-qr-caption",
     });
 
     const footer = contentEl.createDiv({ cls: "excalive-footer" });
     const stopButton = footer.createEl("button", {
       text: "Stop session",
-      cls: "mod-warning",
+      cls: "mod-warning excalive-stop-action",
       attr: { type: "button" },
     });
     stopButton.onclick = async () => {
@@ -301,6 +318,7 @@ export class LiveCollaborationModal extends Modal {
       label: string;
       value: string;
       placeholder: string;
+      description?: string;
       onChange: (value: string) => void | Promise<void>;
     },
   ) {
@@ -319,6 +337,31 @@ export class LiveCollaborationModal extends Modal {
     });
     input.onchange = () => options.onChange(input.value);
     input.oninput = () => options.onChange(input.value);
+    if (options.description) {
+      field.createDiv({
+        text: options.description,
+        cls: "excalive-field__description",
+      });
+    }
     return input;
   }
+
+  private createSectionHeading(
+    container: HTMLElement,
+    options: { title: string; text?: string },
+  ) {
+    const heading = container.createDiv({ cls: "excalive-section-heading" });
+    heading.createDiv({
+      text: options.title,
+      cls: "excalive-section-heading__title",
+    });
+    if (options.text) {
+      heading.createEl("p", {
+        text: options.text,
+        cls: "excalive-section-heading__text",
+      });
+    }
+    return heading;
+  }
+
 }

@@ -1461,13 +1461,21 @@ End Obsidian Sheets Plus support
 }
 
 .excalive-modal-frame {
-  width: min(820px, calc(100vw - 48px));
+  max-height: calc(100vh - 32px) !important;
+  width: min(760px, calc(100vw - 40px));
+}
+
+.excalive-modal-frame .modal-content {
+  max-height: min(760px, calc(100vh - 48px)) !important;
+  overflow-y: auto;
+  padding: 0;
 }
 
 .excalive-modal {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  padding: 20px;
 }
 
 .excalive-modal__header {
@@ -1475,69 +1483,157 @@ End Obsidian Sheets Plus support
   padding-bottom: 12px;
 }
 
-.excalive-modal__title {
-  margin: 0 0 6px;
+.excalive-modal__eyebrow {
   color: var(--text-accent);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.excalive-modal__title {
+  color: var(--text-normal);
   font-size: 24px;
+  letter-spacing: 0;
   line-height: 1.2;
+  margin: 0 0 6px;
 }
 
 .excalive-modal__subtitle,
-.excalive-card__text {
+.excalive-section-heading__text,
+.excalive-field__description,
+.excalive-qr-caption {
   color: var(--text-muted);
+  font-size: var(--font-ui-small);
   line-height: 1.45;
   margin: 0;
 }
 
-.excalive-mode-tabs {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.excalive-mode-tab {
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 8px;
-  background: var(--background-secondary);
-  color: var(--text-normal);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-height: 72px;
-  padding: 12px 14px;
-  text-align: left;
-}
-
-.excalive-mode-tab.is-active {
-  border-color: var(--interactive-accent);
-  box-shadow: inset 0 0 0 1px var(--interactive-accent);
-}
-
-.excalive-mode-tab__title {
-  font-weight: 700;
-}
-
-.excalive-mode-tab__detail {
-  color: var(--text-muted);
-  font-size: var(--font-ui-small);
-}
-
+.excalive-panel,
 .excalive-card,
 .excalive-section {
+  background: var(--background-secondary);
   border: 1px solid var(--background-modifier-border);
   border-radius: 8px;
-  background: var(--background-secondary);
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding: 14px;
 }
 
-.excalive-card__label,
-.excalive-section__title {
+.excalive-panel--mode {
+  background: var(--background-primary);
+}
+
+.excalive-section-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.excalive-section-heading__title {
   color: var(--text-normal);
-  font-weight: 700;
+  font-size: var(--font-ui-medium);
+  font-weight: var(--font-semibold);
+}
+
+.excalive-mode-tabs {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.excalive-mode-tab {
+  align-items: flex-start;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  color: var(--text-normal);
+  cursor: pointer;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  min-height: 76px;
+  padding: 14px;
+  text-align: left;
+  transition:
+    background-color 160ms ease-out,
+    border-color 160ms ease-out,
+    transform 160ms ease-out;
+}
+
+.excalive-mode-tab,
+.excalive-mode-tab * {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.excalive-mode-tab:hover {
+  background: var(--background-modifier-hover);
+  transform: translateY(-1px);
+}
+
+.excalive-mode-tab:focus-visible {
+  outline: 2px solid var(--background-modifier-border-focus);
+  outline-offset: 2px;
+}
+
+.excalive-mode-tab.is-active {
+  background: var(--background-primary);
+  border-color: var(--interactive-accent);
+  box-shadow: inset 0 0 0 1px var(--interactive-accent);
+}
+
+.excalive-mode-tab__indicator {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  height: 16px;
+  margin-top: 2px;
+  position: relative;
+  width: 16px;
+}
+
+.excalive-mode-tab.is-active .excalive-mode-tab__indicator {
+  background: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+}
+
+.excalive-mode-tab.is-active .excalive-mode-tab__indicator::after {
+  background: var(--text-on-accent);
+  border-radius: 999px;
+  content: "";
+  height: 6px;
+  left: 4px;
+  position: absolute;
+  top: 4px;
+  width: 6px;
+}
+
+.excalive-mode-tab__copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.excalive-mode-tab__title {
+  font-weight: var(--font-semibold);
+  line-height: 1.25;
+}
+
+.excalive-mode-tab__detail {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  line-height: 1.35;
+}
+
+.excalive-server-card {
+  background: var(--background-primary);
+}
+
+.excalive-server-fields {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .excalive-field {
@@ -1546,14 +1642,21 @@ End Obsidian Sheets Plus support
 }
 
 .excalive-field__label {
-  color: var(--text-muted);
+  color: var(--text-normal);
   font-size: var(--font-ui-small);
-  font-weight: 600;
+  font-weight: var(--font-semibold);
 }
 
 .excalive-input {
   box-sizing: border-box;
+  min-height: 34px;
   width: 100%;
+}
+
+.excalive-session-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
 }
 
 .excalive-actions,
@@ -1563,11 +1666,26 @@ End Obsidian Sheets Plus support
   gap: 10px;
 }
 
+.excalive-primary-action {
+  min-width: 136px;
+}
+
 .excalive-status {
   align-items: center;
   display: flex;
   gap: 8px;
-  padding: 2px 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  color: var(--text-normal);
+  padding: 10px 12px;
+}
+
+.excalive-status.is-connected {
+  background: var(--background-primary);
+}
+
+.excalive-status.is-connecting {
+  background: var(--background-secondary);
 }
 
 .excalive-status__dot {
@@ -1595,10 +1713,38 @@ End Obsidian Sheets Plus support
   font-family: var(--font-monospace);
 }
 
+.excalive-share-grid {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 196px;
+}
+
+.excalive-share-link {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.excalive-share-note {
+  border-top: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  line-height: 1.45;
+  margin: 4px 0 0;
+  padding-top: 10px;
+}
+
+.excalive-qr-panel {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .excalive-qr {
   display: flex;
   justify-content: center;
-  margin: 4px 0;
 }
 
 .excalive-qr img {
@@ -1606,11 +1752,31 @@ End Obsidian Sheets Plus support
   border: 1px solid var(--background-modifier-border);
   border-radius: 8px;
   padding: 10px;
+  width: min(100%, 176px);
 }
 
-@media (max-width: 680px) {
+.excalive-qr-caption {
+  text-align: center;
+}
+
+.excalive-stop-action {
+  min-width: 120px;
+}
+
+@media (max-width: 720px) {
+  .excalive-modal-frame {
+    width: calc(100vw - 24px);
+  }
+
+  .excalive-modal {
+    padding: 18px;
+  }
+
   .excalive-mode-tabs,
-  .excalive-link-row {
+  .excalive-link-row,
+  .excalive-session-grid,
+  .excalive-share-grid,
+  .excalive-server-fields {
     grid-template-columns: 1fr;
   }
 

@@ -678,6 +678,38 @@ export default class ExcalidrawPlugin extends Plugin {
     commandPalette.modal.commands = commandPalette.getCommands();
   }
 
+  private isCommandManagerRegistered(): boolean {
+    return Boolean(
+      (this.app as any).commands?.commands?.[
+        `${this.manifest.id}:excalidraw-open`
+      ],
+    );
+  }
+
+  private ensureCommandManagerRegistered() {
+    try {
+      if (this.isCommandManagerRegistered()) {
+        this.refreshCommandPaletteCommands();
+        return;
+      }
+      this.commandManager?.destroy();
+      this.commandManager = new CommandManager(this);
+      this.commandManager.initialize();
+      this.refreshCommandPaletteCommands();
+    } catch (e) {
+      new Notice("Error registering commands", 6000);
+      console.error("Error registering commands", e);
+    }
+  }
+
+  private scheduleCommandManagerRegistration(delay: number) {
+    const timer = window.setTimeout(
+      () => this.ensureCommandManagerRegistered(),
+      delay,
+    );
+    this.register(() => window.clearTimeout(timer));
+  }
+
   get locale() {
     return LOCALE;
   }
@@ -822,15 +854,9 @@ export default class ExcalidrawPlugin extends Plugin {
     }
     this.logStartupEvent("Excalidraw Automate initialized");
 
-    try {
-      this.commandManager = new CommandManager(this);
-      this.commandManager.initialize();
-      this.refreshCommandPaletteCommands();
-    } catch (e) {
-      new Notice("Error registering commands", 6000);
-      console.error("Error registering commands", e);
-    }
-    this.logStartupEvent("Commands registered early");
+    this.scheduleCommandManagerRegistration(250);
+    this.scheduleCommandManagerRegistration(1500);
+    this.logStartupEvent("Command registration scheduled");
 
     try {
       //Licat: Are you registering your post processors in onLayoutReady? You should register them in onload instead

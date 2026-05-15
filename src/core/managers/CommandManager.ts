@@ -102,6 +102,7 @@ export class CommandManager {
   private app: App;
   private plugin: ExcalidrawPlugin;
   private openDialog: OpenFileDialog;
+  private eventRefs: EventRef[] = [];
   public insertLinkDialog: InsertLinkDialog;
   public insertCommandDialog: InsertCommandDialog;
   public insertImageDialog: InsertImageDialog;
@@ -154,17 +155,20 @@ export class CommandManager {
   }
 
   destroy() {
-    this.openDialog.destroy();
+    this.eventRefs.forEach((eventRef) => this.app.workspace.offref(eventRef));
+    this.eventRefs = [];
+
+    this.openDialog?.destroy();
     this.openDialog = null;
-    this.insertLinkDialog.destroy();
+    this.insertLinkDialog?.destroy();
     this.insertLinkDialog = null;
-    this.insertCommandDialog.destroy();
+    this.insertCommandDialog?.destroy();
     this.insertCommandDialog = null;
-    this.importSVGDialog.destroy();
+    this.importSVGDialog?.destroy();
     this.importSVGDialog = null;
-    this.insertImageDialog.destroy();
+    this.insertImageDialog?.destroy();
     this.insertImageDialog = null;
-    this.insertMDDialog.destroy();
+    this.insertMDDialog?.destroy();
     this.insertMDDialog = null;
     if (this.taskbone) {
       this.taskbone.destroy();
@@ -174,6 +178,7 @@ export class CommandManager {
   }
 
   private registerEvent(event: EventRef): void {
+    this.eventRefs.push(event);
     this.plugin.registerEvent(event);
   }
 
