@@ -2,9 +2,21 @@
 set -euo pipefail
 
 REPO="NikolaStarx/obsidian-excalidraw-plugin"
-TAG="${EXCALIVE_TAG:-excalive-v2.22.3-live.1}"
-BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
 PLUGIN_ID="obsidian-excalive-plugin"
+DEFAULT_TAG="excalive-v2.22.3-live.1"
+
+if [ "${EXCALIVE_TAG:-}" != "" ]; then
+  TAG="$EXCALIVE_TAG"
+else
+  TAG="$(
+    curl -fsSL "https://api.github.com/repos/${REPO}/releases?per_page=20" |
+      sed -n 's/.*"tag_name": *"\(excalive-[^"]*\)".*/\1/p' |
+      head -n 1
+  )"
+  TAG="${TAG:-$DEFAULT_TAG}"
+fi
+
+BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
 
 choose_vault() {
   if [ "${1:-}" != "" ]; then

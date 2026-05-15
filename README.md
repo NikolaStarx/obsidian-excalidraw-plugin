@@ -2,9 +2,9 @@
 
 Excalive is a personal fork of the Obsidian Excalidraw plugin. It keeps the upstream Excalidraw-for-Obsidian feature set and uses a separate plugin id, `obsidian-excalive-plugin`, so Obsidian treats it as a different plugin from the official Excalidraw plugin.
 
-## Quick install
+## Quick install or update
 
-On macOS, copy this command into Terminal. It works in fish, zsh, and bash. It will open a folder picker; choose the Obsidian vault where you want to install Excalive.
+On macOS, copy this command into Terminal. It works in fish, zsh, and bash. It will open a folder picker; choose the Obsidian vault where you want to install or update Excalive.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NikolaStarx/obsidian-excalidraw-plugin/master/scripts/install-excalive.sh | bash
@@ -16,9 +16,15 @@ If you prefer to pass the vault path directly:
 curl -fsSL https://raw.githubusercontent.com/NikolaStarx/obsidian-excalidraw-plugin/master/scripts/install-excalive.sh | bash -s -- "/path/to/your/vault"
 ```
 
-After installing, restart or reload Obsidian, enable **Excalive** in Community plugins, and disable the original **Excalidraw** plugin if you want Excalive to replace it.
+The command downloads the latest Excalive release assets and overwrites the local plugin files in `<vault>/.obsidian/plugins/obsidian-excalive-plugin/`. After installing or updating, restart or reload Obsidian, enable **Excalive** in Community plugins, and disable the original **Excalidraw** plugin if you want Excalive to replace it.
 
-Manual download: [excalive-v2.22.3-live.1 release](https://github.com/NikolaStarx/obsidian-excalidraw-plugin/releases/tag/excalive-v2.22.3-live.1)
+To install a specific release instead of the latest one:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NikolaStarx/obsidian-excalidraw-plugin/master/scripts/install-excalive.sh | env EXCALIVE_TAG=excalive-v2.22.3-live.1 bash -s -- "/path/to/your/vault"
+```
+
+Manual download: [latest Excalive release](https://github.com/NikolaStarx/obsidian-excalidraw-plugin/releases/latest)
 
 ## Updating from upstream Excalidraw
 
